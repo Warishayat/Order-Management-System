@@ -1,0 +1,1 @@
+console.log("All routes will be here")
