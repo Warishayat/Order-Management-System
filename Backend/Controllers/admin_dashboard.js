@@ -1,24 +1,21 @@
-const Order=require("../Models/Order")
+const Order = require("../Models/Order");
+const SellerRequest = require("../Models/Seller_request");
 
 const getAdminDashboard = async (req, res) => {
   try {
-    const orders = await Order.find()
-      .populate("seller", "name email")
-      .sort({ createdAt: -1 });
+    const orders = await Order.find();
+    const requests = await SellerRequest.find({ status: "pending" });
 
-    const total = orders.length;
-    const pending = orders.filter(o => o.status === "pending").length;
-    const confirmed = orders.filter(o => o.status === "confirmed").length;
-    const cancelled = orders.filter(o => o.status === "cancelled").length;
+    const totalOrders = orders.length;
+    const pendingRequests = requests.length;
+    
+    const confirmedOrders = orders.filter(o => o.status === "confirmed");
+    const totalRevenue = confirmedOrders.reduce((sum, order) => sum + (order.price || 0), 0);
 
     res.status(200).json({
-      stats: {
-        total,
-        pending,
-        confirmed,
-        cancelled,
-      },
-      orders
+      totalOrders,
+      totalRevenue,
+      pendingRequests
     });
 
   } catch (error) {
@@ -26,5 +23,4 @@ const getAdminDashboard = async (req, res) => {
   }
 };
 
-
-module.exports = {getAdminDashboard}
+module.exports = { getAdminDashboard };

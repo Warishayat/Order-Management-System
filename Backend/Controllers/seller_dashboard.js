@@ -2,19 +2,20 @@ const Order = require("../Models/Order");
 
 const getSellerDashboard = async (req, res) => {
   try {
-    const orders = await Order.find({ seller: req.user._id })
-      .sort({ createdAt: -1 });
+    const orders = await Order.find({ seller: req.user._id });
 
-    const stats = {
-      total: orders.length,
-      pending: orders.filter(o => o.status === "pending").length,
-      confirmed: orders.filter(o => o.status === "confirmed").length,
-      cancelled: orders.filter(o => o.status === "cancelled").length,
-    };
+    const totalOrders = orders.length;
+    const pendingOrders = orders.filter(o => o.status === "pending").length;
+    const completedOrders = orders.filter(o => o.status === "confirmed").length;
+    
+    const confirmedOrders = orders.filter(o => o.status === "confirmed");
+    const totalRevenue = confirmedOrders.reduce((sum, order) => sum + (order.price || 0), 0);
 
     res.status(200).json({
-      stats,
-      orders
+      totalOrders,
+      pendingOrders,
+      completedOrders,
+      totalRevenue
     });
 
   } catch (error) {
