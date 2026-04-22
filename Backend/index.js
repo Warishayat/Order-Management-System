@@ -8,6 +8,7 @@ const ConnectDB = require("./Config/Database");
 const auth_router = require("./Routes/auth_route");
 const profile_router = require('./Routes/profile_route');
 const seller_router = require('./Routes/seller_route');
+const admin_router = require("./Routes/admin_route");
 
 const app = express();
 const PORT = process.env.PORT || 8000;
@@ -26,6 +27,7 @@ app.use(cors({
 app.use("/auth", auth_router);
 app.use("/profile",profile_router);
 app.use("/seller",seller_router);
+app.use("/admin",admin_router);
 
 app.get("/", (req, res) => {
     res.send("Hello World! Server is running.");

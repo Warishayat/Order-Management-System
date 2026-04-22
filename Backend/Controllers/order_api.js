@@ -1,21 +1,36 @@
 const Order = require("../Models/Order");
-const uploadImage = require("../Middlewares/upload");
-
+console.log("CREATE ORDER CONTROLLER HIT");
 const createOrder = async (req, res) => {
   try {
-    let imageUrl = "";
-    if (req.file) {
-      imageUrl = await uploadImage(req.file);
+    const {
+      customerName,
+      phone,
+      address,
+      productName,
+      quantity,
+      price,
+    } = req.body;
+    if (!customerName || !phone || !address || !productName || !quantity || !price) {
+      return res.status(400).json({
+        message: "All fields are required",
+      });
     }
+    if (isNaN(quantity) || isNaN(price)) {
+      return res.status(400).json({
+        message: "Quantity and price must be numbers",
+      });
+    }
+
+    const imageUrl = req.file ? req.file.path : "";
 
     const order = await Order.create({
       seller: req.user._id,
-      customerName: req.body.customerName,
-      phone: req.body.phone,
-      address: req.body.address,
-      productName: req.body.productName,
-      quantity: req.body.quantity,
-      price: req.body.price,
+      customerName,
+      phone,
+      address,
+      productName,
+      quantity: Number(quantity),
+      price: Number(price),
       image: imageUrl,
     });
 
