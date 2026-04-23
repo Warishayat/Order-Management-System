@@ -2,11 +2,9 @@ import React, { useEffect, useState } from 'react';
 import api from '../api/axios';
 import { toast } from 'react-hot-toast';
 import { Loader2, CheckCircle, XCircle } from 'lucide-react';
-
 const AdminRequests = () => {
   const [requests, setRequests] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-
   const fetchRequests = async () => {
     try {
       const response = await api.get('/auth/admin/requests');
@@ -17,11 +15,9 @@ const AdminRequests = () => {
       setIsLoading(false);
     }
   };
-
   useEffect(() => {
     fetchRequests();
   }, []);
-
   const handleAction = async (id, action) => {
     try {
       if (action === 'approve') {
@@ -36,7 +32,6 @@ const AdminRequests = () => {
       toast.error(`Failed to ${action} seller`);
     }
   };
-
   if (isLoading) {
     return (
       <div className="flex h-64 items-center justify-center">
@@ -44,11 +39,9 @@ const AdminRequests = () => {
       </div>
     );
   }
-
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-bold text-gray-900">Seller Requests</h1>
-      
       <div className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
@@ -62,7 +55,7 @@ const AdminRequests = () => {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {requests.map((req) => (
+              {requests.filter(req => req.status === 'pending').map((req) => (
                 <tr key={req._id} className="hover:bg-gray-50 transition-colors">
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{req.name}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{req.email}</td>
@@ -90,9 +83,9 @@ const AdminRequests = () => {
                   </td>
                 </tr>
               ))}
-              {requests.length === 0 && (
+              {requests.filter(req => req.status === 'pending').length === 0 && (
                 <tr>
-                  <td colSpan="5" className="px-6 py-4 text-center text-sm text-gray-500">No seller requests found.</td>
+                  <td colSpan="5" className="px-6 py-4 text-center text-sm text-gray-500">No pending seller requests.</td>
                 </tr>
               )}
             </tbody>
@@ -102,5 +95,4 @@ const AdminRequests = () => {
     </div>
   );
 };
-
 export default AdminRequests;

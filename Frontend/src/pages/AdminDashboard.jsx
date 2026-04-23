@@ -1,12 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import api from '../api/axios';
 import { toast } from 'react-hot-toast';
-import { Users, ShoppingBag, Loader2, IndianRupee } from 'lucide-react';
-
+import { Users, ShoppingBag, Loader2, PoundSterling } from 'lucide-react';
 const AdminDashboard = () => {
   const [stats, setStats] = useState({ totalOrders: 0, totalRevenue: 0, pendingRequests: 0 });
   const [isLoading, setIsLoading] = useState(true);
-
   useEffect(() => {
     const fetchDashboard = async () => {
       try {
@@ -20,7 +18,6 @@ const AdminDashboard = () => {
     };
     fetchDashboard();
   }, []);
-
   if (isLoading) {
     return (
       <div className="flex h-64 items-center justify-center">
@@ -28,17 +25,14 @@ const AdminDashboard = () => {
       </div>
     );
   }
-
   const statCards = [
     { title: 'Total Orders', value: stats.totalOrders, icon: ShoppingBag, color: 'text-blue-600', bg: 'bg-blue-100' },
-    { title: 'Total Revenue', value: `₹${stats.totalRevenue}`, icon: IndianRupee, color: 'text-green-600', bg: 'bg-green-100' },
+    { title: 'Total Revenue', value: `£${stats.totalRevenue}`, icon: PoundSterling, color: 'text-green-600', bg: 'bg-green-100' },
     { title: 'Pending Seller Requests', value: stats.pendingRequests, icon: Users, color: 'text-orange-600', bg: 'bg-orange-100' },
   ];
-
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-bold text-gray-900">Admin Dashboard</h1>
-      
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {statCards.map((stat, index) => {
           const Icon = stat.icon;
@@ -58,5 +52,4 @@ const AdminDashboard = () => {
     </div>
   );
 };
-
 export default AdminDashboard;

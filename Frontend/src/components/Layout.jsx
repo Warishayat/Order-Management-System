@@ -2,34 +2,30 @@ import React, { useState, useContext } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import { LayoutDashboard, Users, ShoppingCart, LogOut, PlusCircle, Package, MessageSquare, Menu, X } from 'lucide-react';
-
 const Layout = ({ role }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const { user, logout } = useContext(AuthContext);
   const location = useLocation();
   const navigate = useNavigate();
-
   const handleLogout = () => {
     logout();
     navigate('/login');
   };
-
   const adminLinks = [
     { name: 'Dashboard', path: '/admin/dashboard', icon: LayoutDashboard },
     { name: 'Seller Requests', path: '/admin/requests', icon: Users },
+    { name: 'All Sellers', path: '/admin/sellers', icon: Users },
     { name: 'All Orders', path: '/admin/orders', icon: ShoppingCart },
+    { name: 'Company Orders', path: '/admin/create-order', icon: PlusCircle },
     { name: 'Messages', path: '/admin/messages', icon: MessageSquare },
   ];
-
   const sellerLinks = [
     { name: 'Dashboard', path: '/seller/dashboard', icon: LayoutDashboard },
     { name: 'Create Order', path: '/seller/create-order', icon: PlusCircle },
     { name: 'My Orders', path: '/seller/orders', icon: Package },
     { name: 'Messages', path: '/seller/messages', icon: MessageSquare },
   ];
-
   const links = role === 'admin' ? adminLinks : sellerLinks;
-
   return (
     <div className="min-h-screen bg-gray-50 flex">
       {isSidebarOpen && (
@@ -38,7 +34,6 @@ const Layout = ({ role }) => {
           onClick={() => setIsSidebarOpen(false)}
         />
       )}
-
       <aside className={`fixed inset-y-0 left-0 bg-white border-r border-gray-200 z-30 w-64 transform transition-transform duration-300 md:relative md:translate-x-0 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
         <div className="h-16 flex items-center justify-between px-6 border-b border-gray-200">
           <span className="text-xl font-bold text-gray-800">OMS Portal</span>
@@ -68,7 +63,6 @@ const Layout = ({ role }) => {
           })}
         </nav>
       </aside>
-
       <div className="flex-1 flex flex-col min-w-0">
         <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-4 sm:px-6 z-10">
           <div className="flex items-center gap-3">
@@ -93,7 +87,6 @@ const Layout = ({ role }) => {
             </button>
           </div>
         </header>
-
         <main className="flex-1 p-4 sm:p-6 overflow-auto">
           <Outlet />
         </main>
@@ -101,5 +94,4 @@ const Layout = ({ role }) => {
     </div>
   );
 };
-
 export default Layout;

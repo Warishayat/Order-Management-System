@@ -3,16 +3,13 @@ import { Link, useNavigate } from 'react-router-dom';
 import api from '../api/axios';
 import { toast } from 'react-hot-toast';
 import { Loader2 } from 'lucide-react';
-
 const SellerRequest = () => {
   const [formData, setFormData] = useState({ name: '', email: '', password: '' });
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
-
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
@@ -26,7 +23,6 @@ const SellerRequest = () => {
       setIsLoading(false);
     }
   };
-
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
@@ -40,7 +36,6 @@ const SellerRequest = () => {
           </Link>
         </p>
       </div>
-
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10 border border-gray-100">
           <form className="space-y-6" onSubmit={handleSubmit}>
@@ -57,7 +52,6 @@ const SellerRequest = () => {
                 />
               </div>
             </div>
-
             <div>
               <label className="block text-sm font-medium text-gray-700">Email address</label>
               <div className="mt-1">
@@ -71,7 +65,6 @@ const SellerRequest = () => {
                 />
               </div>
             </div>
-
             <div>
               <label className="block text-sm font-medium text-gray-700">Password</label>
               <div className="mt-1">
@@ -85,7 +78,6 @@ const SellerRequest = () => {
                 />
               </div>
             </div>
-
             <div>
               <button
                 type="submit"
@@ -101,5 +93,4 @@ const SellerRequest = () => {
     </div>
   );
 };
-
 export default SellerRequest;

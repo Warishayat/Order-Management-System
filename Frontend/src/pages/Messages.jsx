@@ -3,7 +3,6 @@ import api from '../api/axios';
 import { AuthContext } from '../context/AuthContext';
 import { toast } from 'react-hot-toast';
 import { Loader2, Send, User } from 'lucide-react';
-
 const Messages = () => {
   const { user } = useContext(AuthContext);
   const [sellers, setSellers] = useState([]);
@@ -12,9 +11,7 @@ const Messages = () => {
   const [newMessage, setNewMessage] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const messagesEndRef = useRef(null);
-
   const isAdmin = user?.role === 'admin';
-
   useEffect(() => {
     if (isAdmin) {
       fetchSellers();
@@ -22,17 +19,14 @@ const Messages = () => {
       fetchMessages();
     }
   }, [isAdmin]);
-
   useEffect(() => {
     if (isAdmin && selectedSellerId) {
       fetchMessages(selectedSellerId);
     }
   }, [selectedSellerId]);
-
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
-
   const fetchSellers = async () => {
     try {
       const res = await api.get('/admin/sellers');
@@ -46,7 +40,6 @@ const Messages = () => {
       setIsLoading(false);
     }
   };
-
   const fetchMessages = async (sellerId = null) => {
     try {
       const url = isAdmin ? `/admin/messages/${sellerId}` : '/seller/messages';
@@ -58,11 +51,9 @@ const Messages = () => {
       setIsLoading(false);
     }
   };
-
   const handleSendMessage = async (e) => {
     e.preventDefault();
     if (!newMessage.trim()) return;
-
     try {
       const url = isAdmin ? `/admin/messages/${selectedSellerId}` : '/seller/messages';
       const res = await api.post(url, { message: newMessage });
@@ -72,7 +63,6 @@ const Messages = () => {
       toast.error('Failed to send message');
     }
   };
-
   if (isLoading) {
     return (
       <div className="flex h-64 items-center justify-center">
@@ -80,12 +70,10 @@ const Messages = () => {
       </div>
     );
   }
-
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-100 flex h-[calc(100vh-8rem)] overflow-hidden">
-      
       {isAdmin && (
-        <div className="w-64 border-r border-gray-200 flex flex-col bg-gray-50 hidden md:flex">
+        <div className={`w-full md:w-64 border-r border-gray-200 flex-col bg-gray-50 ${selectedSellerId ? 'hidden md:flex' : 'flex'}`}>
           <div className="p-4 border-b border-gray-200 font-semibold text-gray-700">Sellers</div>
           <div className="flex-1 overflow-y-auto">
             {sellers.map(seller => (
@@ -109,16 +97,22 @@ const Messages = () => {
           </div>
         </div>
       )}
-
-      <div className="flex-1 flex flex-col min-w-0 bg-white">
-        <div className="h-16 border-b border-gray-200 flex items-center px-6">
+      <div className={`flex-1 flex-col min-w-0 bg-white ${isAdmin && !selectedSellerId ? 'hidden md:flex' : 'flex'}`}>
+        <div className="h-16 border-b border-gray-200 flex items-center px-4 md:px-6 gap-3">
+          {isAdmin && selectedSellerId && (
+            <button 
+              onClick={() => setSelectedSellerId(null)}
+              className="md:hidden p-2 -ml-2 text-gray-500 hover:bg-gray-100 rounded-md"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
+            </button>
+          )}
           <h2 className="text-lg font-semibold text-gray-800">
             {isAdmin ? 
               (sellers.find(s => s._id === selectedSellerId)?.name || 'Select a Seller') : 
               'Chat with Admin'}
           </h2>
         </div>
-
         <div className="flex-1 p-6 overflow-y-auto space-y-4 bg-gray-50">
           {messages.length === 0 ? (
             <div className="text-center text-gray-500 mt-10">No messages yet. Start the conversation!</div>
@@ -141,7 +135,6 @@ const Messages = () => {
           )}
           <div ref={messagesEndRef} />
         </div>
-
         <div className="p-4 bg-white border-t border-gray-200">
           <form onSubmit={handleSendMessage} className="flex gap-2">
             <input
@@ -164,5 +157,4 @@ const Messages = () => {
     </div>
   );
 };
-
 export default Messages;

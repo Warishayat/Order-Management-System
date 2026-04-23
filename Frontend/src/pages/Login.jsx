@@ -4,14 +4,12 @@ import api from '../api/axios';
 import { AuthContext } from '../context/AuthContext';
 import { toast } from 'react-hot-toast';
 import { Loader2 } from 'lucide-react';
-
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const { login } = useContext(AuthContext);
   const navigate = useNavigate();
-
   const handleLogin = async (e) => {
     e.preventDefault();
     setIsLoading(true);
@@ -19,7 +17,6 @@ const Login = () => {
       const response = await api.post('/auth/login', { email, password });
       login(response.data.user, response.data.token);
       toast.success('Logged in successfully!');
-      
       if (response.data.user.role === 'admin') {
         navigate('/admin/dashboard');
       } else {
@@ -31,7 +28,6 @@ const Login = () => {
       setIsLoading(false);
     }
   };
-
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
@@ -45,7 +41,6 @@ const Login = () => {
           </Link>
         </p>
       </div>
-
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10 border border-gray-100">
           <form className="space-y-6" onSubmit={handleLogin}>
@@ -61,7 +56,6 @@ const Login = () => {
                 />
               </div>
             </div>
-
             <div>
               <label className="block text-sm font-medium text-gray-700">Password</label>
               <div className="mt-1">
@@ -74,7 +68,6 @@ const Login = () => {
                 />
               </div>
             </div>
-
             <div>
               <button
                 type="submit"
@@ -90,5 +83,4 @@ const Login = () => {
     </div>
   );
 };
-
 export default Login;

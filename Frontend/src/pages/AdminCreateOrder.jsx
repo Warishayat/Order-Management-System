@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import api from '../api/axios';
 import { toast } from 'react-hot-toast';
 import { Loader2, UploadCloud } from 'lucide-react';
-const CreateOrder = () => {
+const AdminCreateOrder = () => {
   const [formData, setFormData] = useState({
     customerName: '',
     productName: '',
@@ -28,22 +28,24 @@ const CreateOrder = () => {
   };
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!image) {
+      toast.error('Product Image is required');
+      return;
+    }
     setIsLoading(true);
     const data = new FormData();
     for (const key in formData) {
       data.append(key, formData[key]);
     }
-    if (image) {
-      data.append('image', image);
-    }
+    data.append('image', image);
     try {
-      await api.post('/seller/create-order', data, {
+      await api.post('/admin/create-order', data, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
       });
-      toast.success('Order created successfully!');
-      navigate('/seller/orders');
+      toast.success('Company Order created successfully!');
+      navigate('/admin/orders');
     } catch (error) {
       toast.error(error.response?.data?.message || 'Failed to create order');
     } finally {
@@ -52,7 +54,7 @@ const CreateOrder = () => {
   };
   return (
     <div className="max-w-2xl mx-auto space-y-6">
-      <h1 className="text-2xl font-bold text-gray-900">Create New Order</h1>
+      <h1 className="text-2xl font-bold text-gray-900">Create Company Order</h1>
       <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-6">
         <form className="space-y-6" onSubmit={handleSubmit}>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -92,9 +94,9 @@ const CreateOrder = () => {
             <div>
               <label className="block text-sm font-medium text-gray-700">Product Image</label>
               <div className="mt-1 flex items-center">
-                <label className="flex items-center justify-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 cursor-pointer">
+                <label className="flex items-center justify-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 cursor-pointer w-full">
                   <UploadCloud className="w-5 h-5 mr-2 text-gray-400" />
-                  <span>Upload Image</span>
+                  <span className="truncate">{image ? image.name : 'Choose file'}</span>
                   <input type="file" className="sr-only" accept="image/*" onChange={handleImageChange} />
                 </label>
                 {imagePreview && (
@@ -110,8 +112,9 @@ const CreateOrder = () => {
           </div>
           <div className="pt-4 border-t border-gray-200">
             <button type="submit" disabled={isLoading}
-              className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50">
-              {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Create Order'}
+              className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 items-center">
+              {isLoading ? <Loader2 className="w-5 h-5 animate-spin mr-2" /> : null}
+              Create Company Order
             </button>
           </div>
         </form>
@@ -119,4 +122,4 @@ const CreateOrder = () => {
     </div>
   );
 };
-export default CreateOrder;
+export default AdminCreateOrder;
