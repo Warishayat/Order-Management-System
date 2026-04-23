@@ -1,5 +1,4 @@
 const {Schema,model} = require('mongoose');
-
 const SellerRequestSchema = new Schema(
     {
         name:{
@@ -20,8 +19,6 @@ const SellerRequestSchema = new Schema(
             enum: ["pending", "approved", "rejected"],
             default: "pending",
         },
-
     }, { timestamps: true }
 );
-
 module.exports = model("SellerRequest",SellerRequestSchema);

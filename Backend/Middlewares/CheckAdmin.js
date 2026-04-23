@@ -1,6 +1,5 @@
 const jwt = require("jsonwebtoken");
 const User = require("../Models/User");
-
 const adminOnly = (req, res, next) => {
   if (req.user && req.user.role === "admin") {
     next();
@@ -10,5 +9,4 @@ const adminOnly = (req, res, next) => {
     });
   }
 };
-
 module.exports = { adminOnly };

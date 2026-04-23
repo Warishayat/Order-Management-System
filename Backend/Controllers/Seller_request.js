@@ -1,7 +1,6 @@
 const Seller_request = require("../Models/Seller_request");
 const User = require("../Models/User");
 const bcrypt = require('bcrypt');
-
 const SellerRequestForm = async(req,res)=>{
     try {
         const {name,email,password} = req.body;
@@ -25,6 +24,4 @@ const SellerRequestForm = async(req,res)=>{
         res.status(500).json({ message: error.message });
     }
 }
-
-
 module.exports = {SellerRequestForm}
