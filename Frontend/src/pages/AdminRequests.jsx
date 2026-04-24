@@ -71,7 +71,7 @@ const AdminRequests = () => {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     {req.status === 'pending' && (
-                      <div className="flex justify-end gap-2">
+                      <div className="flex justify-end gap-6">
                         <button onClick={() => handleAction(req._id, 'approve')} className="text-green-600 hover:text-green-900" title="Approve">
                           <CheckCircle className="w-5 h-5" />
                         </button>

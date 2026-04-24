@@ -55,6 +55,7 @@ const AdminOrders = () => {
       quantity: order.quantity,
       phone: order.phone,
       address: order.address,
+      postcode: order.postcode,
       price: order.price,
       description: order.description || '',
     });
@@ -236,6 +237,11 @@ const AdminOrders = () => {
                     <textarea name="address" required value={editFormData.address} onChange={handleEditChange} rows="2"
                       className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
                   </div>
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-gray-700">Postcode</label>
+                    <input type="text" name="postcode" required value={editFormData.postcode || ''} onChange={handleEditChange}
+                      className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
+                  </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700">Product Name</label>
                     <input type="text" name="productName" required value={editFormData.productName} onChange={handleEditChange}
@@ -328,6 +334,10 @@ const AdminOrders = () => {
                 <div className="col-span-2">
                   <span className="text-gray-500 block">Address</span>
                   <span className="font-medium text-gray-900">{selectedOrder.address}</span>
+                </div>
+                <div className="col-span-2">
+                  <span className="text-gray-500 block">Postcode</span>
+                  <span className="font-medium text-gray-900">{selectedOrder.postcode}</span>
                 </div>
                 {selectedOrder.description && (
                   <div className="col-span-2">

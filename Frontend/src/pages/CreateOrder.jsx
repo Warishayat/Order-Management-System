@@ -10,6 +10,7 @@ const CreateOrder = () => {
     quantity: 1,
     phone: '',
     address: '',
+    postcode: '',
     price: '',
     description: '',
   });
@@ -69,6 +70,11 @@ const CreateOrder = () => {
             <div className="md:col-span-2">
               <label className="block text-sm font-medium text-gray-700">Address</label>
               <textarea name="address" required value={formData.address} onChange={handleChange} rows="2"
+                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
+            </div>
+            <div className="md:col-span-2">
+              <label className="block text-sm font-medium text-gray-700">Postcode</label>
+              <input type="text" name="postcode" required value={formData.postcode} onChange={handleChange}
                 className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
             </div>
             <div className="md:col-span-2 border-t pt-4 mt-2">
