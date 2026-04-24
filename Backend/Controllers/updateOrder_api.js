@@ -5,6 +5,7 @@ const updateOrder = async (req, res) => {
       customerName,
       phone,
       address,
+      postcode,
       productName,
       description,
       quantity,
@@ -27,6 +28,7 @@ const updateOrder = async (req, res) => {
     order.customerName = customerName || order.customerName;
     order.phone = phone || order.phone;
     order.address = address || order.address;
+    order.postcode = postcode || order.postcode;
     order.productName = productName || order.productName;
     order.description = description || order.description;
     order.quantity = quantity ? Number(quantity) : order.quantity;

@@ -5,12 +5,13 @@ const createOrder = async (req, res) => {
       customerName,
       phone,
       address,
+      postcode,
       productName,
       description,
       quantity,
       price,
     } = req.body;
-    if (!customerName || !phone || !address || !productName || !quantity || !price) {
+    if (!customerName || !phone || !address ||!postcode || !productName || !quantity || !price) {
       return res.status(400).json({ message: "All fields are required" });
     }
     if (isNaN(quantity) || isNaN(price)) {
@@ -23,6 +24,7 @@ const createOrder = async (req, res) => {
       customerName,
       phone,
       address,
+      postcode,
       productName,
       description,
       quantity: Number(quantity),

@@ -29,6 +29,10 @@ const OrderSchema = new mongoose.Schema(
     address: {
       type: String,
     },
+    postcode:{
+      type:String,
+      required:true
+    },
     price: {
       type: Number,
     },
