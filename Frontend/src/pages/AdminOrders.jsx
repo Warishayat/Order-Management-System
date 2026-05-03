@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import api from '../api/axios';
 import { toast } from 'react-hot-toast';
-import { Loader2, Trash2, Edit2, X, UploadCloud, Info } from 'lucide-react';
+import { Loader2, Trash2, Edit2, X, UploadCloud, Info, Truck, MessageSquare } from 'lucide-react';
 const AdminOrders = () => {
   const [orders, setOrders] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -11,16 +11,25 @@ const AdminOrders = () => {
   const [editFormData, setEditFormData] = useState({});
   const [editImage, setEditImage] = useState(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [filterDate, setFilterDate] = useState('');
+  const [showDriverModal, setShowDriverModal] = useState(false);
+  const [showNoteModal, setShowNoteModal] = useState(false);
+  const [driverData, setDriverData] = useState({ name: '', phone: '' });
+  const [noteData, setNoteData] = useState({ deliveryNote: '', status: '' });
+  const [selectedOrderId, setSelectedOrderId] = useState(null);
   const openDetailsModal = (order) => {
     setSelectedOrder(order);
     setShowDetailsModal(true);
   };
-  const fetchOrders = async () => {
+  const fetchOrders = async (date = null) => {
     try {
-      const response = await api.get('/admin/orders');
+      setIsLoading(true);
+      const endpoint = date ? `/admin/orders-by-date?date=${date}` : '/admin/orders';
+      const response = await api.get(endpoint);
       setOrders(response.data.orders || []);
     } catch (error) {
-      toast.error('Failed to fetch orders');
+      console.error('Fetch Orders Error:', error);
+      toast.error(error.response?.data?.message || 'Failed to fetch orders');
     } finally {
       setIsLoading(false);
     }
@@ -28,13 +37,55 @@ const AdminOrders = () => {
   useEffect(() => {
     fetchOrders();
   }, []);
+  const handleFilterDate = () => {
+    if (filterDate) {
+      fetchOrders(filterDate);
+    } else {
+      fetchOrders();
+    }
+  };
   const updateStatus = async (id, newStatus) => {
+    if (newStatus === 'confirmed') {
+      const order = orders.find(o => o._id === id);
+      setSelectedOrderId(id);
+      setNoteData({ deliveryNote: order.deliveryNote || '', status: newStatus });
+      setShowNoteModal(true);
+      return;
+    }
     try {
       await api.put(`/admin/order/${id}/status`, { status: newStatus });
-      toast.success('Order status updated');
-      fetchOrders();
+      toast.success(`Order status updated to ${newStatus}`);
+      fetchOrders(filterDate);
     } catch (error) {
       toast.error('Failed to update order status');
+    }
+  };
+  const handleNoteSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      await api.put(`/admin/order/${selectedOrderId}/status`, { 
+        status: noteData.status, 
+        deliveryNote: noteData.deliveryNote 
+      });
+      toast.success('Order confirmed with note');
+      setShowNoteModal(false);
+      fetchOrders(filterDate);
+    } catch (error) {
+      toast.error('Failed to update order');
+    }
+  };
+  const handleDriverSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      await api.post(`/admin/order/${selectedOrderId}/assign-driver`, { 
+        name: driverData.name, 
+        phone: driverData.phone 
+      });
+      toast.success('Driver assigned successfully');
+      setShowDriverModal(false);
+      fetchOrders(filterDate);
+    } catch (error) {
+      toast.error('Failed to assign driver');
     }
   };
   const deleteOrder = async (id) => {
@@ -58,6 +109,8 @@ const AdminOrders = () => {
       postcode: order.postcode,
       price: order.price,
       description: order.description || '',
+      deliveryDate: order.deliveryDate ? new Date(order.deliveryDate).toISOString().split('T')[0] : '',
+      deliveryNote: order.deliveryNote || '',
     });
     setEditImage(null);
     setShowEditModal(true);
@@ -107,8 +160,30 @@ const AdminOrders = () => {
   const filteredOrders = orders.filter(order => activeTab === 'company' ? order.isCompanyOrder : true);
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <h1 className="text-2xl font-bold text-gray-900">Orders</h1>
+        <div className="flex items-center gap-2">
+          <input 
+            type="date" 
+            value={filterDate} 
+            onChange={(e) => setFilterDate(e.target.value)}
+            className="px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+          />
+          <button 
+            onClick={handleFilterDate}
+            className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 text-sm font-medium"
+          >
+            Filter
+          </button>
+          {filterDate && (
+            <button 
+              onClick={() => { setFilterDate(''); fetchOrders(); }}
+              className="text-sm text-gray-500 hover:text-gray-700"
+            >
+              Clear
+            </button>
+          )}
+        </div>
       </div>
       <div className="flex space-x-1 border-b border-gray-200">
         <button
@@ -139,8 +214,6 @@ const AdminOrders = () => {
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Product</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Seller</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                 <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
               </tr>
@@ -167,11 +240,7 @@ const AdminOrders = () => {
                     {order.isCompanyOrder ? 'Admin' : (order.seller?.name || 'Unknown')}<br/>
                     <span className="text-xs text-gray-400">{order.isCompanyOrder ? 'N/A' : (order.seller?.email || 'N/A')}</span>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {order.customerName}<br/>
-                    <span className="text-xs text-gray-400">{order.phone}</span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">£{order.price}</td>
+
                   <td className="px-6 py-4 whitespace-nowrap text-sm">
                     <select
                       value={order.status}
@@ -187,10 +256,34 @@ const AdminOrders = () => {
                     </select>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <div className="flex items-center justify-end gap-2">
-                      <button onClick={() => openDetailsModal(order)} className="text-blue-500 hover:text-blue-700" title="Details">
+                    <div className="flex items-center justify-end gap-4">
+                      <button onClick={() => openDetailsModal(order)} className="text-blue-500 hover:text-blue-700 transition-colors" title="Details">
                         <Info className="w-5 h-5" />
                       </button>
+                      <button 
+                        onClick={() => {
+                          setSelectedOrderId(order._id);
+                          setNoteData({ deliveryNote: order.deliveryNote || '', status: order.status });
+                          setShowNoteModal(true);
+                        }} 
+                        className={`${order.deliveryNote ? 'text-indigo-600' : 'text-gray-400'} hover:text-indigo-800`} 
+                        title="Delivery Note"
+                      >
+                        <MessageSquare className="w-5 h-5" />
+                      </button>
+                      {order.status !== 'cancelled' && (
+                        <button 
+                          onClick={() => {
+                            setSelectedOrderId(order._id);
+                            setDriverData({ name: order.driver?.name || '', phone: order.driver?.phone || '' });
+                            setShowDriverModal(true);
+                          }} 
+                          className={`${order.driver?.name ? 'text-green-600' : 'text-gray-400'} hover:text-green-800`} 
+                          title="Assign Driver"
+                        >
+                          <Truck className="w-5 h-5" />
+                        </button>
+                      )}
                       <button onClick={() => openEditModal(order)} className="text-indigo-500 hover:text-indigo-700" title="Edit Order">
                         <Edit2 className="w-5 h-5" />
                       </button>
@@ -272,6 +365,16 @@ const AdminOrders = () => {
                     <textarea name="description" value={editFormData.description} onChange={handleEditChange} rows="2"
                       className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
                   </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Delivery Date</label>
+                    <input type="date" name="deliveryDate" value={editFormData.deliveryDate} onChange={handleEditChange}
+                      className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
+                  </div>
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-gray-700">Delivery Note</label>
+                    <textarea name="deliveryNote" value={editFormData.deliveryNote} onChange={handleEditChange} rows="2"
+                      className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
+                  </div>
                 </div>
               </form>
             </div>
@@ -345,6 +448,33 @@ const AdminOrders = () => {
                     <span className="font-medium text-gray-900">{selectedOrder.description}</span>
                   </div>
                 )}
+                {selectedOrder.deliveryDate && (
+                  <div>
+                    <span className="text-gray-500 block">Delivery Date</span>
+                    <span className="font-medium text-gray-900">{new Date(selectedOrder.deliveryDate).toLocaleDateString()}</span>
+                  </div>
+                )}
+                {selectedOrder.deliveryNote && (
+                  <div className="col-span-2">
+                    <span className="text-gray-500 block">Delivery Note</span>
+                    <span className="font-medium text-gray-900 italic text-indigo-600">"{selectedOrder.deliveryNote}"</span>
+                  </div>
+                )}
+                {selectedOrder.driver && selectedOrder.driver.name && (
+                  <div className="col-span-2 bg-indigo-50 p-2 rounded-md border border-indigo-100">
+                    <span className="text-indigo-700 font-semibold text-xs uppercase tracking-wider block mb-1">Driver Assigned</span>
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <span className="text-gray-500 text-xs block">Name</span>
+                        <span className="font-medium text-gray-900">{selectedOrder.driver.name}</span>
+                      </div>
+                      <div>
+                        <span className="text-gray-500 text-xs block">Phone</span>
+                        <span className="font-medium text-gray-900">{selectedOrder.driver.phone}</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
                 <div className="col-span-2 border-t pt-2 mt-2">
                   <span className="text-gray-500 block">Seller Information</span>
                   <span className="font-medium text-gray-900">
@@ -358,6 +488,70 @@ const AdminOrders = () => {
                 Close
               </button>
             </div>
+          </div>
+        </div>
+      )}
+      {showNoteModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-[60]">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-md overflow-hidden">
+            <div className="flex items-center justify-between p-4 border-b">
+              <h3 className="text-lg font-semibold">Confirm Order</h3>
+              <button onClick={() => setShowNoteModal(false)} className="text-gray-500 hover:text-gray-700">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <form onSubmit={handleNoteSubmit} className="p-4 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Delivery Note (Optional)</label>
+                <textarea 
+                  value={noteData.deliveryNote} 
+                  onChange={(e) => setNoteData({...noteData, deliveryNote: e.target.value})} 
+                  rows="3"
+                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" 
+                  placeholder="e.g. Discount applied due to delay"
+                />
+              </div>
+              <div className="pt-4 flex justify-end gap-3">
+                <button type="button" onClick={() => setShowNoteModal(false)} className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50">
+                  Cancel
+                </button>
+                <button type="submit" className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 text-sm font-medium">
+                  Confirm Order
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+      {showDriverModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-[60]">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-md overflow-hidden">
+            <div className="flex items-center justify-between p-4 border-b">
+              <h3 className="text-lg font-semibold">Assign Driver</h3>
+              <button onClick={() => setShowDriverModal(false)} className="text-gray-500 hover:text-gray-700">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <form onSubmit={handleDriverSubmit} className="p-4 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Driver Name</label>
+                <input type="text" required value={driverData.name} onChange={(e) => setDriverData({...driverData, name: e.target.value})}
+                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Driver Phone</label>
+                <input type="text" required value={driverData.phone} onChange={(e) => setDriverData({...driverData, phone: e.target.value})}
+                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
+              </div>
+              <div className="pt-4 flex justify-end gap-3">
+                <button type="button" onClick={() => setShowDriverModal(false)} className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50">
+                  Cancel
+                </button>
+                <button type="submit" className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 text-sm font-medium">
+                  Save Driver
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

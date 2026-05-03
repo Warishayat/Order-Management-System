@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import api from '../api/axios';
 import { toast } from 'react-hot-toast';
-import { Loader2, Trash2, Edit2, XCircle, Info, X, UploadCloud } from 'lucide-react';
+import { Loader2, Trash2, Edit2, XCircle, Info, X, UploadCloud, Truck, MessageSquare } from 'lucide-react';
 const SellerOrders = () => {
   const [orders, setOrders] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -10,6 +10,10 @@ const SellerOrders = () => {
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [editFormData, setEditFormData] = useState({});
   const [editImage, setEditImage] = useState(null);
+  const [showViewNoteModal, setShowViewNoteModal] = useState(false);
+  const [showDriverDetailsModal, setShowDriverDetailsModal] = useState(false);
+  const [viewNote, setViewNote] = useState('');
+  const [driverDetails, setDriverDetails] = useState({ name: '', phone: '' });
   const fetchOrders = async () => {
     try {
       const response = await api.get('/seller/my-orders');
@@ -23,6 +27,10 @@ const SellerOrders = () => {
   useEffect(() => {
     fetchOrders();
   }, []);
+  const renderImageUrl = (image) => {
+    if (!image) return null;
+    return image.startsWith('http') ? image : `http://localhost:8000/${image.replace(/\\/g, '/')}`;
+  };
   const deleteOrder = async (id) => {
     if (!window.confirm('Are you sure you want to delete this order?')) return;
     try {
@@ -54,6 +62,8 @@ const SellerOrders = () => {
       postcode: order.postcode,
       price: order.price,
       description: order.description || '',
+      deliveryDate: order.deliveryDate ? new Date(order.deliveryDate).toISOString().split('T')[0] : '',
+      deliveryNote: order.deliveryNote || '',
     });
     setEditImage(null);
     setShowEditModal(true);
@@ -97,10 +107,7 @@ const SellerOrders = () => {
       </div>
     );
   }
-  const renderImageUrl = (image) => {
-    if (!image) return null;
-    return image.startsWith('http') ? image : `http://localhost:8000/${image.replace(/\\/g, '/')}`;
-  };
+
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-bold text-gray-900">My Orders</h1>
@@ -111,7 +118,6 @@ const SellerOrders = () => {
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Product</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                 <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
               </tr>
@@ -131,7 +137,7 @@ const SellerOrders = () => {
                     {order.customerName}<br/>
                     <span className="text-xs text-gray-400">{order.phone}</span>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">£{order.price}</td>
+
                   <td className="px-6 py-4 whitespace-nowrap text-sm">
                     <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
                       ${order.status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 
@@ -140,9 +146,33 @@ const SellerOrders = () => {
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <div className="flex items-center justify-end gap-2">
-                      <button onClick={() => openDetailsModal(order)} className="text-blue-500 hover:text-blue-700" title="Details">
+                    <div className="flex items-center justify-end gap-4">
+                      <button onClick={() => openDetailsModal(order)} className="text-blue-500 hover:text-blue-700 transition-colors" title="Details">
                         <Info className="w-5 h-5" />
+                      </button>
+                      <button 
+                        onClick={() => {
+                          setViewNote(order.deliveryNote || 'No note available');
+                          setShowViewNoteModal(true);
+                        }} 
+                        className={`${order.deliveryNote ? 'text-indigo-600' : 'text-gray-400'} hover:text-indigo-800`} 
+                        title="View Delivery Note"
+                      >
+                        <MessageSquare className="w-5 h-5" />
+                      </button>
+                      <button 
+                        onClick={() => {
+                          if (order.driver?.name) {
+                            setDriverDetails({ name: order.driver.name, phone: order.driver.phone });
+                            setShowDriverDetailsModal(true);
+                          } else {
+                            toast.error('Driver not assigned yet');
+                          }
+                        }} 
+                        className={`${order.driver?.name ? 'text-green-600' : 'text-gray-400'} hover:text-green-800`} 
+                        title="Driver Info"
+                      >
+                        <Truck className="w-5 h-5" />
                       </button>
                       {order.status !== 'confirmed' && order.status !== 'cancelled' && (
                         <>
@@ -232,6 +262,16 @@ const SellerOrders = () => {
                     <textarea name="description" value={editFormData.description} onChange={handleEditChange} rows="2"
                       className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
                   </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Delivery Date</label>
+                    <input type="date" name="deliveryDate" value={editFormData.deliveryDate} onChange={handleEditChange}
+                      className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
+                  </div>
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-gray-700">Delivery Note</label>
+                    <textarea name="deliveryNote" value={editFormData.deliveryNote} onChange={handleEditChange} rows="2"
+                      className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
+                  </div>
                 </div>
               </form>
             </div>
@@ -305,11 +345,90 @@ const SellerOrders = () => {
                     <span className="font-medium text-gray-900">{selectedOrder.description}</span>
                   </div>
                 )}
+                {selectedOrder.deliveryDate && (
+                  <div>
+                    <span className="text-gray-500 block">Delivery Date</span>
+                    <span className="font-medium text-gray-900">{new Date(selectedOrder.deliveryDate).toLocaleDateString()}</span>
+                  </div>
+                )}
+                {selectedOrder.deliveryNote && (
+                  <div className="col-span-2">
+                    <span className="text-gray-500 block">Delivery Note</span>
+                    <span className="font-medium text-gray-900 italic text-indigo-600">"{selectedOrder.deliveryNote}"</span>
+                  </div>
+                )}
+                {selectedOrder.driver && selectedOrder.driver.name && (
+                  <div className="col-span-2 bg-indigo-50 p-2 rounded-md border border-indigo-100">
+                    <span className="text-indigo-700 font-semibold text-xs uppercase tracking-wider block mb-1">Driver Information</span>
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <span className="text-gray-500 text-xs block">Name</span>
+                        <span className="font-medium text-gray-900">{selectedOrder.driver.name}</span>
+                      </div>
+                      <div>
+                        <span className="text-gray-500 text-xs block">Phone</span>
+                        <span className="font-medium text-gray-900">{selectedOrder.driver.phone}</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
             <div className="p-4 border-t flex justify-end bg-gray-50">
               <button type="button" onClick={() => setShowDetailsModal(false)} className="px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
                 Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showViewNoteModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-[60]">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-md overflow-hidden">
+            <div className="flex items-center justify-between p-4 border-b bg-indigo-50">
+              <h3 className="text-lg font-semibold text-indigo-900">Delivery Note</h3>
+              <button onClick={() => setShowViewNoteModal(false)} className="text-gray-500 hover:text-gray-700">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="p-6">
+              <p className="text-gray-700 italic text-lg leading-relaxed">"{viewNote}"</p>
+            </div>
+            <div className="p-4 border-t bg-gray-50 flex justify-end">
+              <button onClick={() => setShowViewNoteModal(false)} className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 text-sm font-medium">
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showDriverDetailsModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-[60]">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-md overflow-hidden">
+            <div className="flex items-center justify-between p-4 border-b bg-green-50">
+              <h3 className="text-lg font-semibold text-green-900 flex items-center gap-2">
+                <Truck className="w-5 h-5" />
+                Driver Information
+              </h3>
+              <button onClick={() => setShowDriverDetailsModal(false)} className="text-gray-500 hover:text-gray-700">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="p-6 space-y-4">
+              <div className="flex justify-between items-center border-b pb-2">
+                <span className="text-gray-500 font-medium">Name</span>
+                <span className="text-gray-900 font-bold text-lg">{driverDetails.name}</span>
+              </div>
+              <div className="flex justify-between items-center border-b pb-2">
+                <span className="text-gray-500 font-medium">Phone</span>
+                <span className="text-gray-900 font-bold text-lg text-indigo-600">{driverDetails.phone}</span>
+              </div>
+            </div>
+            <div className="p-4 border-t bg-gray-50 flex justify-end">
+              <button onClick={() => setShowDriverDetailsModal(false)} className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 text-sm font-medium">
+                Got it
               </button>
             </div>
           </div>
