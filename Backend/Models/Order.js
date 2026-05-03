@@ -48,6 +48,28 @@ const OrderSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    driver: {
+      name: {
+        type: String,
+        default: ""
+      },
+    phone: {
+        type: String,
+        default: ""
+    },
+    assignedAt: {
+        type: Date,
+        default: null
+    }
+    },
+    deliveryNote: {
+      type: String,
+      default: ""
+    },
+    deliveryDate: {
+    type: Date,
+    default: null
+  }
   },
   { timestamps: true }
 );

@@ -10,6 +10,8 @@ const updateOrder = async (req, res) => {
       description,
       quantity,
       price,
+      deliveryDate,
+      deliveryNote,
     } = req.body;
     const order = await Order.findById(req.params.id);
     if (!order) {
@@ -33,6 +35,8 @@ const updateOrder = async (req, res) => {
     order.description = description || order.description;
     order.quantity = quantity ? Number(quantity) : order.quantity;
     order.price = price ? Number(price) : order.price;
+    order.deliveryDate = deliveryDate ? new Date(deliveryDate) : order.deliveryDate;
+    order.deliveryNote = deliveryNote !== undefined ? deliveryNote : order.deliveryNote;
     order.image = imageUrl;
     const updatedOrder = await order.save();
     res.status(200).json({

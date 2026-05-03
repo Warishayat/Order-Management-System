@@ -10,6 +10,8 @@ const createOrder = async (req, res) => {
       description,
       quantity,
       price,
+      deliveryDate,
+      deliveryNote,
     } = req.body;
     if (!customerName || !phone || !address ||!postcode || !productName || !quantity || !price) {
       return res.status(400).json({ message: "All fields are required" });
@@ -28,6 +30,8 @@ const createOrder = async (req, res) => {
       productName,
       description,
       quantity: Number(quantity),
+      deliveryDate: deliveryDate ? new Date(deliveryDate) : null,
+      deliveryNote: deliveryNote || "",
       price: Number(price),
       image: imageUrl,
       status: isAdmin ? "confirmed" : "pending",

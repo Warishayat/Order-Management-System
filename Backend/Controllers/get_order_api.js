@@ -9,26 +9,37 @@ const getAllOrders = async (req, res) => {
 };
 const updateOrderStatus = async (req, res) => {
   try {
-    const { status } = req.body;
+    const { status, deliveryNote } = req.body;
+
     if (!["pending", "confirmed", "cancelled"].includes(status)) {
       return res.status(400).json({
         message: "Invalid status",
       });
     }
+
+    const updateData = { status };
+
+    if (deliveryNote !== undefined) {
+      updateData.deliveryNote = deliveryNote;
+    }
+
     const order = await Order.findByIdAndUpdate(
       req.params.id,
-      { status },
-      { returnDocument: "after" }
+      updateData,
+      { new: true }
     );
+
     if (!order) {
       return res.status(404).json({
         message: "Order not found",
       });
     }
+
     res.status(200).json({
-      message: "Order status updated",
+      message: "Order updated successfully",
       order,
     });
+
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

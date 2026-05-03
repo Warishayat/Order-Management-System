@@ -13,6 +13,12 @@ const upload = require("../Middlewares/upload");
 const {getAllSellers} = require("../Controllers/sellers_api");
 const {getSingleOrder} = require("../Controllers/open_order_api");
 admin_router.get("/orders",protect,adminOnly,getAllOrders);
+const {Order_by_date} = require("../Controllers/Order_by_date");
+const {assignDriver} = require("../Controllers/Driver_Assign");
+
+
+
+
 admin_router.put("/order/:id/status",protect,adminOnly,updateOrderStatus);
 admin_router.delete("/order/:id", protect, adminOnly, deleteOrder);
 admin_router.get("/dashboard", protect, adminOnly, getAdminDashboard);
@@ -24,4 +30,8 @@ admin_router.put("/edit-order/:id", protect,adminOnly, upload.single("image"), u
 admin_router.post("/add-commission", protect,adminOnly, addCommission);
 admin_router.get("/all-sellers", protect, adminOnly, getAllSellers);
 admin_router.get("/order/:id", protect, adminOnly, getSingleOrder);
+admin_router.get("/orders-by-date",protect,adminOnly,Order_by_date);
+admin_router.post("/order/:id/assign-driver",protect,adminOnly,assignDriver);
+
+
 module.exports = admin_router;
