@@ -11,7 +11,7 @@ const updateOrderStatus = async (req, res) => {
   try {
     const { status, deliveryNote } = req.body;
 
-    if (!["pending", "confirmed", "cancelled"].includes(status)) {
+    if (!["pending", "confirmed", "cancelled","delivered"].includes(status)) {
       return res.status(400).json({
         message: "Invalid status",
       });
@@ -26,7 +26,7 @@ const updateOrderStatus = async (req, res) => {
     const order = await Order.findByIdAndUpdate(
       req.params.id,
       updateData,
-      { new: true }
+      { returnDocument: 'after' }
     );
 
     if (!order) {
