@@ -141,7 +141,7 @@ const SellerOrders = () => {
                   <td className="px-6 py-4 whitespace-nowrap text-sm">
                     <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
                       ${order.status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 
-                        order.status === 'confirmed' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                        (order.status === 'confirmed' || order.status === 'delivered') ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
                       {order.status}
                     </span>
                   </td>
@@ -311,7 +311,7 @@ const SellerOrders = () => {
                   <span className="text-gray-500 block">Status</span>
                   <span className={`inline-flex text-xs leading-5 font-semibold rounded-full px-2 mt-1
                     ${selectedOrder.status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 
-                      selectedOrder.status === 'confirmed' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                      (selectedOrder.status === 'confirmed' || selectedOrder.status === 'delivered') ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
                     {selectedOrder.status}
                   </span>
                 </div>

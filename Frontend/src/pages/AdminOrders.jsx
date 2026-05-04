@@ -247,12 +247,13 @@ const AdminOrders = () => {
                       onChange={(e) => updateStatus(order._id, e.target.value)}
                       className={`text-xs font-semibold rounded-full px-2 py-1 border-0 ring-1 ring-inset 
                         ${order.status === 'pending' ? 'bg-yellow-50 text-yellow-700 ring-yellow-600/20' : 
-                          order.status === 'confirmed' ? 'bg-green-50 text-green-700 ring-green-600/20' : 
+                          (order.status === 'confirmed' || order.status === 'delivered') ? 'bg-green-50 text-green-700 ring-green-600/20' : 
                           'bg-red-50 text-red-700 ring-red-600/20'}`}
                     >
                       <option value="pending">Pending</option>
                       <option value="confirmed">Confirmed</option>
                       <option value="cancelled">Cancelled</option>
+                      <option value="delivered">Delivered</option>
                     </select>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
@@ -414,7 +415,7 @@ const AdminOrders = () => {
                   <span className="text-gray-500 block">Status</span>
                   <span className={`inline-flex text-xs leading-5 font-semibold rounded-full px-2 mt-1
                     ${selectedOrder.status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 
-                      selectedOrder.status === 'confirmed' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                      (selectedOrder.status === 'confirmed' || selectedOrder.status === 'delivered') ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
                     {selectedOrder.status}
                   </span>
                 </div>
