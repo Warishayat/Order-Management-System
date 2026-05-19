@@ -4,8 +4,9 @@ import { toast } from 'react-hot-toast';
 import { Loader2, Trash2, Edit2, X, UploadCloud, Info, Truck, MessageSquare } from 'lucide-react';
 const AdminOrders = () => {
   const [orders, setOrders] = useState([]);
+  const [searchQuery, setSearchQuery] = useState('');
   const [isLoading, setIsLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('all'); 
+  const [activeTab, setActiveTab] = useState('all');
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [showEditModal, setShowEditModal] = useState(false);
   const [editFormData, setEditFormData] = useState({});
@@ -157,12 +158,28 @@ const AdminOrders = () => {
     if (!image) return null;
     return image.startsWith('http') ? image : `http://localhost:8000/${image.replace(/\\/g, '/')}`;
   };
-  const filteredOrders = orders.filter(order => activeTab === 'company' ? order.isCompanyOrder : true);
+  const filteredOrders = orders.filter(order => {
+    const matchesTab = activeTab === 'company' ? order.isCompanyOrder : true;
+    const sellerName = order.isCompanyOrder ? 'admin' : (order.seller?.name || '').toLowerCase();
+    const customerName = (order.customerName || '').toLowerCase();
+    const productName = (order.productName || '').toLowerCase();
+    const query = searchQuery.toLowerCase();
+    const matchesSearch = sellerName.includes(query) || customerName.includes(query) || productName.includes(query);
+    return matchesTab && matchesSearch;
+  });
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <h1 className="text-2xl font-bold text-gray-900">Orders</h1>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <input 
+            type="text"
+            placeholder="Search seller, customer, or product..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm w-64"
+          />
           <input 
             type="date" 
             value={filterDate} 
