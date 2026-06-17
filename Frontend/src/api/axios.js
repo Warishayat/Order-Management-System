@@ -1,6 +1,6 @@
 import axios from 'axios';
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'https://order-management-system-hw5l.onrender.com', 
+  baseURL: import.meta.env.VITE_API_URL || 'https://efficient-miracle-application.up.railway.app/', 
 });
 api.interceptors.request.use(
   (config) => {
